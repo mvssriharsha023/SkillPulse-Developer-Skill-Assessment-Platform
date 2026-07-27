@@ -97,7 +97,7 @@ FOR EACH ROW
 BEGIN
     IF OLD.status != NEW.status THEN
         INSERT INTO user_audit_log (user_id, action, old_value, new_value)
-        VALUES (NEW.id, 'STATUA_CHANGE', OLD.status, NEW.status);
+        VALUES (NEW.id, 'STATUS_CHANGE', OLD.status, NEW.status);
     END IF;
     IF OLD.role != NEW.role THEN
         INSERT INTO user_audit_log (user_id, action, old_value, new_value)

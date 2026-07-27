@@ -134,7 +134,7 @@ AFTER UPDATE ON assessments
 FOR EACH ROW
 BEGIN
     IF OLD.status != NEW.status THEN
-        INSERT INTO assessment_audit_log (assessment_id, action, old_value, new_value)
+        INSERT INTO assessment_audit_log (assessment_id, action, old_status, new_status)
         VALUES (NEW.id, 'STATUS_CHANGE', OLD.status, NEW.status);
     END IF;
 END $$
@@ -251,6 +251,7 @@ SELECT
     att.submitted_at,
     att.time_taken_seconds,
     COUNT(ans.id)                                           AS total_answered,
+    a.total_questions,
     SUM(CASE WHEN ans.is_correct = TRUE THEN 1 ELSE 0 END) AS correct_answers,
     SUM(CASE WHEN ans.is_correct = TRUE
         THEN q.points ELSE 0 END)                          AS raw_score,
