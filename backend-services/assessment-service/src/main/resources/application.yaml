@@ -1,0 +1,63 @@
+spring:
+  application:
+    name: assessment-service
+  datasource:
+    url: jdbc:mysql://localhost:3306/assessment_db
+    username: root
+    password: password
+  jpa:
+    hibernate:
+      ddl_auto: update
+    show-sql: true
+  kafka:
+    bootstrap-servers: localhost:9092
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      acks: all
+      properties:
+        enable.idempotence: true
+
+server:
+  port: 8081
+  error:
+    include-message: always
+    include-binding-errors: always
+
+user-service:
+  base-url: http://localhost:8082/api/v1/users
+
+resilience4j:
+  retry:
+    instances:
+      userServiceRetry:
+        max-attempts: 3
+        wait-duration: 1s
+        exponential-backoff-multiplier: 2
+        retry-exceptions:
+          - java.net.ConnectException
+          - java.util.concurrent.TimeoutException
+  circuitbreaker:
+    instances:
+      userServiceCB:
+        sliding-window-type: COUNT_BASED
+        sliding-window-size: 10
+        failure-rate-threshold: 50
+        minimum-number-of-calls: 5
+        wait-duration-in-open-state: 30s
+        permitted-number-of-calls-in-half-open-state: 3
+        automatic-transition-from-open-to-half-open-state: true
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health, info, circuitbreakers
+  health:
+    circuitbreakers:
+      enabled: true
+
+logging:
+  level:
+    org.springframework.kafka: DEBUG
+    org.apache.kafka: DEBUG
