@@ -52,7 +52,7 @@ public class AssessmentController {
         return ResponseEntity.ok(assessmentSummaryDTOPage);
     }
 
-    @PutMapping("/publish-assessment/{id}")
+    @PatchMapping("/{id}/publish")
     public ResponseEntity<AssessmentResponseDTO> publishAssessment(@PathVariable Long id) {
         AssessmentResponseDTO assessmentResponseDTO = assessmentService.publishAssessment(id);
 
@@ -64,7 +64,7 @@ public class AssessmentController {
         return ResponseEntity.status(HttpStatus.OK).body(assessmentService.archiveAssessment(id));
     }
 
-    @PostMapping("/create-question")
+    @PostMapping("/questions")
     public ResponseEntity<QuestionResponseDTO> addQuestion(@Valid @RequestBody AddQuestionRequestDTO request) {
 
         QuestionResponseDTO questionResponseDTO = assessmentService.addQuestion(request);
