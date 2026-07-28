@@ -33,7 +33,7 @@ public class AssessmentSummaryView {
     @Column(name = "difficulty")
     private String difficulty;
 
-    @Column(name = "total_limit_minutes")
+    @Column(name = "time_limit_minutes")
     private Integer totalLimitMinutes;
 
     @Column(name = "total_questions")
