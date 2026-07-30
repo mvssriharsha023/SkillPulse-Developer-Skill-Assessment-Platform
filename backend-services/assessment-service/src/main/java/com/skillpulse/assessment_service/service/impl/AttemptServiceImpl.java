@@ -7,9 +7,11 @@ import com.skillpulse.assessment_service.exceptions.ResourceNotFoundException;
 import com.skillpulse.assessment_service.mapper.AttemptMapper;
 import com.skillpulse.assessment_service.mapper.QuestionMapper;
 import com.skillpulse.assessment_service.messaging.AssessmentSubmissionProducer;
+import com.skillpulse.assessment_service.messaging.AwardBadgeProducer;
 import com.skillpulse.assessment_service.model.*;
 import com.skillpulse.assessment_service.repository.*;
 import com.skillpulse.assessment_service.service.AttemptService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -26,6 +28,7 @@ import java.util.Map;
 import java.util.Optional;
 
 @Service
+@Slf4j
 public class AttemptServiceImpl implements AttemptService {
 
     private final AssessmentRepository assessmentRepository;
@@ -46,9 +49,11 @@ public class AttemptServiceImpl implements AttemptService {
 
     private final AssessmentSubmissionProducer assessmentSubmissionProducer;
 
+    private final AwardBadgeProducer awardBadgeProducer;
+
     private final SimpleJdbcCall simpleJdbcCall;
 
-    public AttemptServiceImpl(AssessmentRepository assessmentRepository, AssessmentAttemptRepository assessmentAttemptRepository, QuestionRepository questionRepository, AttemptAnswerRepository attemptAnswerRepository, AttemptDetailsViewRepository attemptDetailsViewRepository, UserClientService userClientService, QuestionMapper questionMapper, AttemptMapper attemptMapper, AssessmentSubmissionProducer assessmentSubmissionProducer, DataSource dataSource) {
+    public AttemptServiceImpl(AssessmentRepository assessmentRepository, AssessmentAttemptRepository assessmentAttemptRepository, QuestionRepository questionRepository, AttemptAnswerRepository attemptAnswerRepository, AttemptDetailsViewRepository attemptDetailsViewRepository, UserClientService userClientService, QuestionMapper questionMapper, AttemptMapper attemptMapper, AssessmentSubmissionProducer assessmentSubmissionProducer, AwardBadgeProducer awardBadgeProducer, DataSource dataSource) {
         this.assessmentRepository = assessmentRepository;
         this.assessmentAttemptRepository = assessmentAttemptRepository;
         this.questionRepository = questionRepository;
@@ -58,6 +63,7 @@ public class AttemptServiceImpl implements AttemptService {
         this.questionMapper = questionMapper;
         this.attemptMapper = attemptMapper;
         this.assessmentSubmissionProducer = assessmentSubmissionProducer;
+        this.awardBadgeProducer = awardBadgeProducer;
         this.simpleJdbcCall = new SimpleJdbcCall(dataSource)
                 .withProcedureName("SubmitAssessmentAttempt")
                 .declareParameters(
@@ -180,6 +186,20 @@ public class AttemptServiceImpl implements AttemptService {
                 .build();
 
         assessmentSubmissionProducer.publish(assessmentSubmittedEvent);
+
+        List<AttemptDetailsView> attemptDetailsViewList = attemptDetailsViewRepository.findByUserId(attemptDetails.getUserId());
+
+        List<AttemptResultDTO> attempts = attemptDetailsViewList.stream()
+                        .map(attemptMapper::attemptToAttemptResultDTO)
+                        .toList();
+
+        AwardBadgeEvent awardBadgeEvent = AwardBadgeEvent.builder()
+                .userId(attemptDetails.getUserId())
+                .attempts(attempts)
+                .build();
+
+        log.info("Publishing event to award a badge {}", awardBadgeEvent);
+        awardBadgeProducer.publish(awardBadgeEvent);
 
         return attemptMapper.attemptToAttemptResultDTO(attemptDetails);
     }

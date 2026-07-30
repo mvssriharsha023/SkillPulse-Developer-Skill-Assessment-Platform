@@ -209,6 +209,7 @@ public class UserServiceImpl implements UserService {
         UserBadgeEntity userBadgeEntity = UserBadgeEntity.builder()
                 .userId(request.getUserId())
                 .badgeId(request.getBadgeId())
+                .awardedAt(LocalDateTime.now())
                 .build();
 
         UserBadgeEntity savedUserBadgeEntity = userBadgeRepository.save(userBadgeEntity);

@@ -11,6 +11,7 @@ import org.springframework.kafka.core.ProducerFactory;
 public class KafkaConfig {
 
     public static final String ASSESSMENT_EVENT_TOPIC = "assessment-events";
+    public static final String AWARD_BADGE_EVENT_TOPIC = "award-badge-events";
     public static final int PARTITIONS = 3;
 
     @Autowired
@@ -19,6 +20,14 @@ public class KafkaConfig {
     @Bean
     public NewTopic assessmentEventsTopic() {
         return TopicBuilder.name(ASSESSMENT_EVENT_TOPIC)
+                .partitions(PARTITIONS)
+                .replicas(1)
+                .build();
+    }
+
+    @Bean
+    public NewTopic awardBadgeEventsTopic() {
+        return TopicBuilder.name(AWARD_BADGE_EVENT_TOPIC)
                 .partitions(PARTITIONS)
                 .replicas(1)
                 .build();

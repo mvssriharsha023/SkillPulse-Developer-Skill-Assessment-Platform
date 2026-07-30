@@ -9,5 +9,4 @@ public class KafkaConfig {
 
     // Topic names — must match Assessment Service exactly
     public static final String ASSESSMENT_EVENTS_TOPIC = "assessment-events";
-    public static final String USER_EVENTS_TOPIC = "user-events";
 }

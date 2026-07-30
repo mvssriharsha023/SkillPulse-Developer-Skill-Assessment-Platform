@@ -1,0 +1,12 @@
+package com.skillpulse.user_service.config;
+
+import org.springframework.context.annotation.Configuration;
+import org.springframework.kafka.annotation.EnableKafka;
+
+@Configuration
+@EnableKafka
+public class KafkaConfig {
+
+    public static final String AWARD_BADGE_EVENT_TOPIC = "award-badge-events";
+
+}
