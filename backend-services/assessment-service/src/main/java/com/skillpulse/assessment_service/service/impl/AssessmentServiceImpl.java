@@ -79,17 +79,54 @@ public class AssessmentServiceImpl implements AssessmentService {
     }
 
     @Override
-    public Page<AssessmentSummaryDTO> getPublishedAssessments(String skillCategory, String difficulty, int page, int size) {
+    public Page<AssessmentSummaryDTO> getPublishedAssessments(
+            String skillCategory,
+            String difficulty,
+            int page,
+            int size
+    ) {
 
         Pageable pageable = PageRequest.of(page, size);
 
-        Page<AssessmentSummaryView> assessmentSummaryViewPage = assessmentSummaryViewRepository.findBySkillCategoryAndDifficulty(
-                skillCategory,
-                difficulty,
-                pageable
-        );
+        Page<AssessmentSummaryView> assessmentSummaryViewPage;
 
-        return assessmentSummaryViewPage.map(assessmentMapper::assessmentToAssessmentSummaryDTO);
+        if (skillCategory != null && !skillCategory.isEmpty()
+                && difficulty != null && !difficulty.isEmpty()) {
+
+            assessmentSummaryViewPage =
+                    assessmentSummaryViewRepository
+                            .findBySkillCategoryAndDifficulty(
+                                    skillCategory,
+                                    difficulty,
+                                    pageable
+                            );
+
+        } else if (skillCategory != null && !skillCategory.isEmpty()) {
+
+            assessmentSummaryViewPage =
+                    assessmentSummaryViewRepository
+                            .findBySkillCategory(
+                                    skillCategory,
+                                    pageable
+                            );
+
+        } else if (difficulty != null && !difficulty.isEmpty()) {
+
+            assessmentSummaryViewPage =
+                    assessmentSummaryViewRepository
+                            .findByDifficulty(
+                                    difficulty,
+                                    pageable
+                            );
+
+        } else {
+
+            assessmentSummaryViewPage =
+                    assessmentSummaryViewRepository.findAll(pageable);
+        }
+
+        return assessmentSummaryViewPage
+                .map(assessmentMapper::assessmentToAssessmentSummaryDTO);
     }
 
     @Override

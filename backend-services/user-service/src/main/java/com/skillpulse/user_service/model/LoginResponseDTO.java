@@ -1,12 +1,18 @@
 package com.skillpulse.user_service.model;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
+import lombok.*;
 
-@Data
+@Getter
+@Setter
+@NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class LoginResponseDTO {
 
-    private String token;
+    private Long id;
+
+    private String fullName;
+
+    private String role;
 
 }

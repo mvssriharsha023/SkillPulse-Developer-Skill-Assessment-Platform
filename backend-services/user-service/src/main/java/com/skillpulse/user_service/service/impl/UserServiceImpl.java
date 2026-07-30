@@ -87,13 +87,17 @@ public class UserServiceImpl implements UserService {
     @Override
     public LoginResponseDTO loginUser(LoginRequestDTO request) {
         UserEntity user = userRepository.findByEmail(request.getEmail())
-                .orElseThrow(() -> new ResourceNotFoundException("User not found!"));
+                .orElseThrow(() -> new ResourceNotFoundException("User doesn't exist with the provided email!"));
 
         if (!request.getPassword().equals(user.getPasswordHash())) {
             throw new InvalidCredentialsException("Wrong password! Please try again!");
         }
 
-        return new LoginResponseDTO("token");
+        return LoginResponseDTO.builder()
+                .id(user.getId())
+                .fullName(user.getFullName())
+                .role(user.getRole())
+                .build();
     }
 
     @Override
@@ -236,7 +240,7 @@ public class UserServiceImpl implements UserService {
         DeveloperProfileEntity developerProfile = developerProfileRepository.findByUserId(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("Developer Profile not found with id: " +  userId));
 
-        double newAvg = ((developerProfile.getAverageScore() * developerProfile.getTotalAssessments()) + newScore) / (developerProfile.getTotalAssessments()) + 1;
+        double newAvg = ((developerProfile.getAverageScore() * developerProfile.getTotalAssessments()) + newScore) / (developerProfile.getTotalAssessments() + 1);
         developerProfile.setAverageScore(newAvg);
         developerProfile.setTotalAssessments(developerProfile.getTotalAssessments() + 1);
 

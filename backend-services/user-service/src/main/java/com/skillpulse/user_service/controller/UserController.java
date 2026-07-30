@@ -89,7 +89,7 @@ public class UserController {
                 .body(badgeResponseDTO);
     }
 
-    @PutMapping("/{userId}/profile/stats")
+    @PatchMapping("/{userId}/profile/stats")
     public ResponseEntity<String> updateProfileStats(@PathVariable Long userId, @RequestBody UpdateProfileStatsRequestDTO updateProfileStatsRequestDTO) {
 
         userService.updateProfileStats(userId, updateProfileStatsRequestDTO.getNewScore(), updateProfileStatsRequestDTO.getPassed());

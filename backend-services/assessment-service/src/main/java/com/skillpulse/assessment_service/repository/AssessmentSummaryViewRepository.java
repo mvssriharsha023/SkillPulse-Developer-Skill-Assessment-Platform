@@ -8,4 +8,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 public interface AssessmentSummaryViewRepository extends JpaRepository<AssessmentSummaryView, Long> {
 
     Page<AssessmentSummaryView> findBySkillCategoryAndDifficulty(String skillCategory, String difficulty, Pageable pageable);
+
+    Page<AssessmentSummaryView> findByDifficulty(String difficulty, Pageable pageable);
+
+    Page<AssessmentSummaryView> findBySkillCategory(String skillCategory, Pageable pageable);
 }
