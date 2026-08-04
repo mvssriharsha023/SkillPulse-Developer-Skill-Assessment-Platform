@@ -13,6 +13,7 @@ import com.skillpulse.assessment_service.repository.AssessmentRepository;
 import com.skillpulse.assessment_service.repository.AssessmentSummaryViewRepository;
 import com.skillpulse.assessment_service.repository.QuestionRepository;
 import com.skillpulse.assessment_service.service.AssessmentService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -21,6 +22,7 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 
 @Service
+@Slf4j
 public class AssessmentServiceImpl implements AssessmentService {
 
     private final UserClientService userClientService;
@@ -74,6 +76,26 @@ public class AssessmentServiceImpl implements AssessmentService {
 
         AssessmentEntity assessment = assessmentRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Assessment not found with id " + id));
+
+        return assessmentMapper.assessmentToAssessmentResponse(assessment);
+    }
+
+    @Override
+    public AssessmentResponseDTO updateAssessment(UpdateAssessmentRequestDTO requestDTO) {
+        AssessmentEntity assessment = assessmentRepository.findById(requestDTO.getId())
+                .orElseThrow(() -> new ResourceNotFoundException("Assessment not found with id " + requestDTO.getId()));
+
+        if (assessment.getStatus().equals("PUBLISHED")) {
+            throw new NotAllowedException("Published assessment is not allowed to be updated");
+        }
+        assessment.setTitle(requestDTO.getTitle());
+        assessment.setDescription(requestDTO.getDescription());
+        assessment.setSkillCategory(requestDTO.getSkillCategory());
+        assessment.setDifficulty(requestDTO.getDifficulty());
+        assessment.setTimeLimitMinutes(requestDTO.getTimeLimitMinutes());
+        assessment.setPassingScore(requestDTO.getPassingScore());
+
+        assessmentRepository.save(assessment);
 
         return assessmentMapper.assessmentToAssessmentResponse(assessment);
     }
@@ -168,6 +190,35 @@ public class AssessmentServiceImpl implements AssessmentService {
         AssessmentEntity savedAssessment = assessmentRepository.save(assessment);
 
         return assessmentMapper.assessmentToAssessmentResponse(savedAssessment);
+    }
+
+    @Override
+    public Page<AssessmentResponseDTO> getUserAssessments(Long userId, String skillCategory, String difficulty, int page, int size) {
+
+        Pageable pageable = PageRequest.of(page, size);
+        log.info("Params received {} {} {}", userId, skillCategory, difficulty);
+
+        boolean hasSkillCategory = skillCategory != null && !skillCategory.isBlank();
+        boolean hasDifficulty = difficulty != null && !difficulty.isBlank();
+
+        String filterType = (hasSkillCategory ? "S" : "") + (hasDifficulty ? "D" : "");
+
+        Page<AssessmentEntity> assessmentEntities = switch (filterType) {
+            case "SD" -> assessmentRepository
+                    .findByCreatedByUserIdAndSkillCategoryAndDifficulty(
+                            userId, skillCategory, difficulty, pageable);
+            case "S" -> assessmentRepository
+                    .findByCreatedByUserIdAndSkillCategory(
+                            userId, skillCategory, pageable);
+            case "D" -> assessmentRepository
+                    .findByCreatedByUserIdAndDifficulty(
+                            userId, difficulty, pageable);
+            default -> assessmentRepository
+                    .findByCreatedByUserId(userId, pageable);
+        };
+
+        return assessmentEntities
+                .map(assessmentMapper::assessmentToAssessmentResponse);
     }
 
     @Override

@@ -28,6 +28,22 @@ public class AssessmentController {
         return ResponseEntity.status(HttpStatus.CREATED).body(assessmentResponseDTO);
     }
 
+    @GetMapping("/{userId}/my-assessments")
+    public ResponseEntity<Page<AssessmentResponseDTO>> getUserAssessments(
+            @PathVariable Long userId,
+            @RequestParam(name = "skillCategory", required = false) String skillCategory,
+            @RequestParam(name = "difficulty", required = false) String difficulty,
+            @RequestParam(name = "page", required = false, defaultValue = "0") int page,
+            @RequestParam(name = "size", required = false, defaultValue = "10") int size
+    ) {
+
+        Page<AssessmentResponseDTO> assessments = assessmentService.getUserAssessments(
+                userId, skillCategory, difficulty, page, size
+        );
+
+        return ResponseEntity.ok(assessments);
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<AssessmentResponseDTO> getAssessmentById(@PathVariable Long id) {
         AssessmentResponseDTO assessmentResponseDTO = assessmentService.getAssessmentById(id);
@@ -50,6 +66,14 @@ public class AssessmentController {
         );
 
         return ResponseEntity.ok(assessmentSummaryDTOPage);
+    }
+
+    @PutMapping
+    public ResponseEntity<AssessmentResponseDTO> updateAssessment(@Valid @RequestBody UpdateAssessmentRequestDTO requestDTO) {
+
+        AssessmentResponseDTO assessmentResponseDTO = assessmentService.updateAssessment(requestDTO);
+
+        return ResponseEntity.ok(assessmentResponseDTO);
     }
 
     @PatchMapping("/{id}/publish")
@@ -80,7 +104,7 @@ public class AssessmentController {
         return ResponseEntity.ok(questionResponseDTOS);
     }
 
-    @DeleteMapping("/questions/{questionId}")
+    @DeleteMapping("/{questionId}/questions")
     public ResponseEntity<String> deleteQuestion(@PathVariable Long questionId) {
 
         assessmentService.deleteQuestion(questionId);

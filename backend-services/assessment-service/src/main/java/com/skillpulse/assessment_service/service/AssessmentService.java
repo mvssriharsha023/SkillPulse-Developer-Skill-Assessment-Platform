@@ -10,9 +10,11 @@ public interface AssessmentService {
     // Assessment CRUD
     AssessmentResponseDTO createAssessment(CreateAssessmentRequestDTO request);
     AssessmentResponseDTO getAssessmentById(Long id);
+    AssessmentResponseDTO updateAssessment(UpdateAssessmentRequestDTO requestDTO);
     Page<AssessmentSummaryDTO> getPublishedAssessments(String skillCategory, String difficulty, int page, int size);
     AssessmentResponseDTO publishAssessment(Long id);
     AssessmentResponseDTO archiveAssessment(Long id);
+    Page<AssessmentResponseDTO> getUserAssessments(Long userId, String skillCategory, String difficulty,  int page, int size);
 
     // Questions
     QuestionResponseDTO addQuestion(AddQuestionRequestDTO request);
