@@ -13,5 +13,6 @@ public interface AttemptService {
     AttemptResultDTO submitAttempt(SubmitAttemptRequestDTO request);
     AttemptResultDTO getAttemptResult(Long attemptId);
     Page<AttemptResultDTO> getUserAttempts(Long userId, int page, int size);
+    AttemptResultDTO hasUserTakenAssessment(Long userId, Long assessmentId);
 
 }

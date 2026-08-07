@@ -64,4 +64,14 @@ public class AttemptController {
 
         return new ResponseEntity<>(resultDTOPage, HttpStatus.OK);
     }
+
+    @GetMapping("/hasTaken")
+    public ResponseEntity<AttemptResultDTO> hasUserTakenAssessment(
+            @RequestParam(name = "userId") Long userId,
+            @RequestParam(name = "assessmentId") Long assessmentId
+    ) {
+        AttemptResultDTO attemptResultDTO = attemptService.hasUserTakenAssessment(userId, assessmentId);
+
+        return new ResponseEntity<>(attemptResultDTO, HttpStatus.OK);
+    }
 }

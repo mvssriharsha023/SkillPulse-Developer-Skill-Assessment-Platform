@@ -15,4 +15,6 @@ public interface AttemptDetailsViewRepository
     Page<AttemptDetailsView> findByUserId(Long userId, Pageable pageable);
 
     List<AttemptDetailsView> findByUserId(Long userId);
+
+    AttemptDetailsView findByUserIdAndAssessmentId(Long userId, Long assessmentId);
 }

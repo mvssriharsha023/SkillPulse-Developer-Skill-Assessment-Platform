@@ -13,6 +13,8 @@ public class SkillScoreDTO {
 
     private String skillCategory;
 
+    private String fullName;
+
     private Integer assessmentsTaken;
 
     private Integer assessmentsPassed;

@@ -6,6 +6,7 @@ import com.skillpulse.score_service.model.LeaderboardEntryDTO;
 import com.skillpulse.score_service.model.SkillScoreDTO;
 import com.skillpulse.score_service.repository.LeaderboardEntryRepository;
 import com.skillpulse.score_service.repository.SkillScoreRepository;
+import com.skillpulse.score_service.service.LeaderboardService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
@@ -20,15 +21,15 @@ import java.util.stream.Collectors;
 public class LeaderboardController {
 
     private final LeaderboardEntryRepository leaderboardEntryRepository;
-    private final SkillScoreRepository skillScoreRepository;
+    private final LeaderboardService leaderboardService;
     private final ScoreMapper scoreMapper;
 
     public LeaderboardController(
             LeaderboardEntryRepository leaderboardEntryRepository,
-            SkillScoreRepository skillScoreRepository,
+            LeaderboardService leaderboardService,
             ScoreMapper scoreMapper) {
         this.leaderboardEntryRepository = leaderboardEntryRepository;
-        this.skillScoreRepository = skillScoreRepository;
+        this.leaderboardService = leaderboardService;
         this.scoreMapper = scoreMapper;
     }
 
@@ -64,11 +65,9 @@ public class LeaderboardController {
     @GetMapping("/skills/{category}")
     public ResponseEntity<List<SkillScoreDTO>> getSkillLeaderboard(
             @PathVariable String category) {
-        List<SkillScoreDTO> skillLeaderboard = skillScoreRepository
-                .findBySkillCategoryOrderByAverageScoreDesc(category)
-                .stream()
-                .map(scoreMapper::toSkillScoreDTO)
-                .collect(Collectors.toList());
+
+        List<SkillScoreDTO> skillLeaderboard = leaderboardService.getSkillLeaderboard(category);
+
         return ResponseEntity.ok(skillLeaderboard);
     }
 

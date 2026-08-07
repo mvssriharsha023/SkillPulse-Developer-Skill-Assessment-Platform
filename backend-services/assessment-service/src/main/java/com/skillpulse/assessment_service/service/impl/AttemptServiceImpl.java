@@ -222,6 +222,17 @@ public class AttemptServiceImpl implements AttemptService {
         return attemptDetailsViews.map(attemptMapper::attemptToAttemptResultDTO);
     }
 
+    @Override
+    public AttemptResultDTO hasUserTakenAssessment(Long userId, Long assessmentId) {
+
+        AttemptDetailsView attemptDetailsView = attemptDetailsViewRepository.findByUserIdAndAssessmentId(userId, assessmentId);
+
+        if (attemptDetailsView == null) {
+            return null;
+        }
+        return attemptMapper.attemptToAttemptResultDTO(attemptDetailsView);
+    }
+
     public void callSubmitProcedure(Long attemptId, Integer timeTakenSeconds, SimpleJdbcCall simpleJdbcCall) {
 
         MapSqlParameterSource params = new MapSqlParameterSource()

@@ -1,6 +1,10 @@
 package com.skillpulse.score_service.client;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.skillpulse.score_service.exceptions.ResourceNotFoundException;
+import com.skillpulse.score_service.exceptions.ServiceUnavailableException;
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
+import io.github.resilience4j.retry.annotation.Retry;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -30,6 +34,27 @@ public class UserServiceClient {
                 .baseUrl(baseUrl)
                 .clientConnector(new ReactorClientHttpConnector(httpClient))
                 .build();
+    }
+
+    @CircuitBreaker(name = "userServiceCB", fallbackMethod = "getUserByIdFallback")
+    @Retry(name = "userServiceRetry")
+    public UserClientDTO getUserDetails(Long id) {
+        return webClient.get()
+                .uri("/{id}", id)
+                .retrieve()
+                .onStatus(status -> status.value() == 404,
+                        response -> Mono.error(new ResourceNotFoundException("User not found! with id: " + id)))
+                .onStatus(
+                        HttpStatusCode::is5xxServerError,
+                        clientResponse -> Mono.error(new ServiceUnavailableException("Service Unavailable!"))
+                )
+                .bodyToMono(UserClientDTO.class)
+                .block();
+    }
+
+    public UserClientDTO getUserByIdFallback(Long userId, Exception ex) {
+        if (ex instanceof ResourceNotFoundException) throw (ResourceNotFoundException) ex;
+        throw new ServiceUnavailableException("User Service unavailable. Please try again.");
     }
 
     public void updateProfileStats(Long userId, Double newScore, Boolean passed) {

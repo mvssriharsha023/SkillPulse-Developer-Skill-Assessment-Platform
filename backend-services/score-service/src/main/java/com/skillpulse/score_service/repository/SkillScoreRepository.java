@@ -12,7 +12,5 @@ public interface SkillScoreRepository extends JpaRepository<SkillScoreEntity, Lo
 
     List<SkillScoreEntity> findByUserId(Long userId);
 
-    Optional<SkillScoreEntity> findByUserIdAndSkillCategory(Long userId, String skillCategory);
-
     List<SkillScoreEntity> findBySkillCategoryOrderByAverageScoreDesc(String skillCategory);
 }
